@@ -84,6 +84,12 @@ class CustomerViewSet(viewsets.ModelViewSet):
         serializer = CustomerSerializer(customer)
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):  # อันนี้คือ DELETE method นะ
+        customer = self.get_object()
+        customer.delete()
+
+        return Response({'detail': 'Object removed'})
+
 
 class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.filter(
