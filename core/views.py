@@ -1,4 +1,3 @@
-from django.http import HttpResponseNotAllowed
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -72,6 +71,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
         customer.profession.add(profession)
         customer.save()
 
+        serializer = CustomerSerializer(customer)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):  # อันนี้คือ PATCH method
+        customer = self.get_object()
+        customer.name = request.data.get('name', customer.name)
+        customer.address = request.data.get('address', customer.address)
+        customer.datasheet_id = request.data.get('datasheet', customer.datasheet_id)
+
+        customer.save()
         serializer = CustomerSerializer(customer)
         return Response(serializer.data)
 
