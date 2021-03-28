@@ -1,3 +1,4 @@
+from django.http import HttpResponseNotAllowed
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -21,6 +22,25 @@ class CustomerViewSet(viewsets.ModelViewSet):
         customers = Customer.objects.filter(id=3) # พอเรามา override แบบนี้ มันก้อจะสนใจแค่ id=3 นะ แต่ไม่ทำ active=true ข้างบน
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs): # ใช้เมื่อมีการดึงค่า id ออกมา ถ้าพิมพ์ kwargs จะได้ {'pk': '2'} นะใน pdb
+        # obj = self.get_object()  # สร้าง object ขึั้นมา แล้วใส่เข้าไปให้เป็น serializer จิงๆเราทำเหมือนกับที่เราไป override มานะ
+        # serializer = CustomerSerializer(obj)
+        # return Response(serializer.data)
+        # return Response({'details': 'Not allowed q'})  # คือ เราจะให้มัน return เป็นอะไรก็ได้นะ ผ่านทาง Response แบบนี้
+        return HttpResponseNotAllowed('Q Not allowed')  # หรือจะส่งกลับไปแบบนี้ก้อได้ แบบที่ Django มีมาให้ อันนี้ได้ 405 นะ
+
+
+    #  อันนี้แค่ไปก๊อบมาให้ดูว่า ที่เราไป override คือให้ไปทับกับตัวนี้นะ
+    # class RetrieveModelMixin:
+    #     """
+    #     Retrieve a model instance.
+    #     """
+    #
+    #     def retrieve(self, request, *args, **kwargs):
+    #         instance = self.get_object()
+    #         serializer = self.get_serializer(instance)
+    #         return Response(serializer.data)
 
 
 
