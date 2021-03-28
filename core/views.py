@@ -1,6 +1,7 @@
-from core.models import Customer, Profession
-from core.serializers import CustomerSerializer, ProfessionSerializer
 from rest_framework import viewsets
+
+from core.models import Customer, Profession, DataSheet, Document
+from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -10,5 +11,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 
 class ProfessionViewSet(viewsets.ModelViewSet):
-    queryset = Profession.objects.filter(id=4)  # ถ้าแบบนี้ก้อจะช่วย filter จาก id ที่ 2 ได้เลยเวลาเรียก api 'professions'
+    queryset = Profession.objects.filter(
+        id=4)  # ถ้าแบบนี้ก้อจะช่วย filter จาก id ที่ 2 ได้เลยเวลาเรียก api 'professions'
     serializer_class = ProfessionSerializer
+
+
+class DataSheetViewSet(viewsets.ModelViewSet):
+    queryset = DataSheet.objects.all()
+    serializer_class = DataSheetSerializer
+
+
+class DocumentViewSet(viewsets.ModelViewSet):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer

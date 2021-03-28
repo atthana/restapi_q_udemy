@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Profession(models.Model):
     description = models.CharField(max_length=50)
 
@@ -17,7 +18,6 @@ class Customer(models.Model):
     address = models.CharField(max_length=50)
     profession = models.ManyToManyField(Profession)
     datasheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE)
-
 
     def __str__(self):
         return self.name
