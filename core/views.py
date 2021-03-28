@@ -9,6 +9,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
     # queryset = Customer.objects.filter(active=True)  # ถ้าเราต้องการ filter ก้อมาทำแบบนี้ได้เลย เพราะอันนี้คือการ query
     serializer_class = CustomerSerializer
 
+    def get_queryset(
+            self):  # คือ เรามา override method  ตรงนี้ได้เมื่อ queryset จะเป็นการ filter by active=True แทนได้ทั้งหมด
+        active_customers = Customer.objects.filter(active=True)
+        return active_customers
+
 
 class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.filter(
