@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.models import Customer, Profession, DataSheet, Document
@@ -18,8 +19,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # import pdb
         # pdb.set_trace()
-        customers = Customer.objects.filter(
-            id=3)  # พอเรามา override แบบนี้ มันก้อจะสนใจแค่ id=3 นะ แต่ไม่ทำ active=true ข้างบน
+        # customers = Customer.objects.filter(
+        #     id=3)  # พอเรามา override แบบนี้ มันก้อจะสนใจแค่ id=3 นะ แต่ไม่ทำ active=true ข้างบน
+        customers = Customer.objects.all()
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
 
@@ -89,6 +91,46 @@ class CustomerViewSet(viewsets.ModelViewSet):
         customer.delete()
 
         return Response({'detail': 'Object removed'})
+
+    @action(detail=True)
+    def deactivate(self, request, **kwargs):
+        customer = self.get_object()
+        customer.active = False
+        customer.save()
+
+        serializer = CustomerSerializer(customer)
+        return Response(serializer.data)
+
+    # การใช้ action แบบนี้เป็นการเพิ่ม urlให้มัน ตอนเรียกเราก้อแค่ GET ไปที่ http://localhost:8000/api/customers/3/deactivate/
+    # จะทำให้ active กลายเป็น False ไปเลย คือ เป็ฯการ GET ที่เปลี่ยนค่าได้ หรือเรียกว่า custom actions
+
+    @action(detail=False)
+    def deactivate_all(self, request,
+                       **kwargs):  # http://localhost:8000/api/customers/deactivate_all/ แค่นี้ก้อเป็น False หมดเลยทันที ไวมาก
+        customers = Customer.objects.all()
+        customers.update(active=False)
+
+        serializer = CustomerSerializer(customers, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def activate_all(self, request,
+                     **kwargs):  # http://localhost:8000/api/customers/activate_all/ แค่ GET แบบนี้ก้อเป็น True หมดเลยทันที
+        customers = Customer.objects.all()
+        customers.update(active=True)
+
+        serializer = CustomerSerializer(customers, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['POST'])  # อันนี้ใช้ method POST  gเพื่อทำการเปลี่ยน status ของ active
+    def change_status(self, request, **kwargs):  # http://localhost:8000/api/customers/change_status/ แต่ต้องใช้ POST method นะ
+        status = True if request.data['active'] == 'True' else False
+
+        customers = Customer.objects.all()
+        customers.update(active=status)
+
+        serializer = CustomerSerializer(customers, many=True)
+        return Response(serializer.data)
 
 
 class ProfessionViewSet(viewsets.ModelViewSet):
