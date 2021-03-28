@@ -26,12 +26,12 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args,
                  **kwargs):  # ใช้เมื่อมีการดึงค่า id ออกมา ถ้าพิมพ์ kwargs จะได้ {'pk': '2'} นะใน pdb
-        # obj = self.get_object()  # สร้าง object ขึั้นมา แล้วใส่เข้าไปให้เป็น serializer จิงๆเราทำเหมือนกับที่เราไป override มานะ
-        # serializer = CustomerSerializer(obj)
-        # return Response(serializer.data)
+        obj = self.get_object()  # สร้าง object ขึั้นมา แล้วใส่เข้าไปให้เป็น serializer จิงๆเราทำเหมือนกับที่เราไป override มานะ
+        serializer = CustomerSerializer(obj)
+        return Response(serializer.data)
         # return Response({'details': 'Not allowed q'})  # คือ เราจะให้มัน return เป็นอะไรก็ได้นะ ผ่านทาง Response แบบนี้
-        return HttpResponseNotAllowed(
-            'Q Not allowed')  # หรือจะส่งกลับไปแบบนี้ก้อได้ แบบที่ Django มีมาให้ อันนี้ได้ 405 นะ
+        # return HttpResponseNotAllowed(
+        #     'Q Not allowed')  # หรือจะส่งกลับไปแบบนี้ก้อได้ แบบที่ Django มีมาให้ อันนี้ได้ 405 นะ
 
     #  อันนี้แค่ไปก๊อบมาให้ดูว่า ที่เราไป override คือให้ไปทับกับตัวนี้นะ
     # class RetrieveModelMixin:
@@ -44,11 +44,29 @@ class CustomerViewSet(viewsets.ModelViewSet):
     #         serializer = self.get_serializer(instance)
     #         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):  # อันนี้เป็นการทำ override create() บ้าง
+    def create(self, request, *args, **kwargs):  # อันนี้เป็นการทำ override create() บ้าง มันคือ POST method นะ
         data = request.data
         customer = Customer.objects.create(
             name=data['name'], address=data['address'], datasheet_id=data['datasheet']
         )
+        profession = Profession.objects.get(id=data['profession'])
+
+        for p in customer.professions.all():
+            customer.professions.remove(p)
+
+        customer.profession.add(profession)
+        customer.save()
+
+        serializer = CustomerSerializer(customer)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):  # แบบนี้เทสด้วย PUT method ใน Postman นะ
+        customer = self.get_object()
+        data = request.data
+        customer.name = data['name']
+        customer.address = data['address']
+        customer.datasheet_id = data['datasheet']
+
         profession = Profession.objects.get(id=data['profession'])
 
         customer.profession.add(profession)
