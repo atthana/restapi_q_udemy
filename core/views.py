@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 
 from core.models import Customer, Profession, DataSheet, Document
 from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
@@ -13,6 +14,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
             self):  # คือ เรามา override method  ตรงนี้ได้เมื่อ queryset จะเป็นการ filter by active=True แทนได้ทั้งหมด
         active_customers = Customer.objects.filter(active=True)
         return active_customers
+
+    def list(self, request, *args, **kwargs):
+        # import pdb
+        # pdb.set_trace()
+        customers = Customer.objects.filter(id=3) # พอเรามา override แบบนี้ มันก้อจะสนใจแค่ id=3 นะ แต่ไม่ทำ active=true ข้างบน
+        serializer = CustomerSerializer(customers, many=True)
+        return Response(serializer.data)
+
 
 
 class ProfessionViewSet(viewsets.ModelViewSet):
