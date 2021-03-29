@@ -11,17 +11,30 @@ class CustomerViewSet(viewsets.ModelViewSet):
     # queryset = Customer.objects.filter(active=True)  # ถ้าเราต้องการ filter ก้อมาทำแบบนี้ได้เลย เพราะอันนี้คือการ query
     serializer_class = CustomerSerializer
 
-    def get_queryset(
-            self):  # คือ เรามา override method  ตรงนี้ได้เมื่อ queryset จะเป็นการ filter by active=True แทนได้ทั้งหมด
-        active_customers = Customer.objects.filter(active=True)
-        return active_customers
+    def get_queryset(self):  # ผมเทสผ่านล่ะนะ แต่ถ้าจะเทส ก้อไป comment method อื่นออก
+        # import pdb;
+        # pdb.set_trace()
+
+        id = self.request.query_params.get('id', None)
+        status = True if self.request.query_params['active'] == 'True' else False
+
+        if id:
+            customers = Customer.objects.filter(id=id, active=status)
+        else:
+            customers = Customer.objects.filter(active=status)
+        return customers
+
+    # def get_queryset(
+    #         self):  # คือ เรามา override method  ตรงนี้ได้เมื่อ queryset จะเป็นการ filter by active=True แทนได้ทั้งหมด
+    #     active_customers = Customer.objects.filter(active=True)
+    #     return active_customers
 
     def list(self, request, *args, **kwargs):
         # import pdb
         # pdb.set_trace()
         # customers = Customer.objects.filter(
         #     id=3)  # พอเรามา override แบบนี้ มันก้อจะสนใจแค่ id=3 นะ แต่ไม่ทำ active=true ข้างบน
-        customers = Customer.objects.all()
+        customers = self.get_object()
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
 
@@ -107,7 +120,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def deactivate_all(self, request,
                        **kwargs):  # http://localhost:8000/api/customers/deactivate_all/ แค่นี้ก้อเป็น False หมดเลยทันที ไวมาก
-        customers = Customer.objects.all()
+        customers = self.get_queryset()
         customers.update(active=False)
 
         serializer = CustomerSerializer(customers, many=True)
@@ -116,7 +129,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def activate_all(self, request,
                      **kwargs):  # http://localhost:8000/api/customers/activate_all/ แค่ GET แบบนี้ก้อเป็น True หมดเลยทันที
-        customers = Customer.objects.all()
+        customers = self.get_queryset()
         customers.update(active=True)
 
         serializer = CustomerSerializer(customers, many=True)
@@ -126,7 +139,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def change_status(self, request, **kwargs):  # http://localhost:8000/api/customers/change_status/ แต่ต้องใช้ POST method นะ
         status = True if request.data['active'] == 'True' else False
 
-        customers = Customer.objects.all()
+        customers = self.get_queryset()
         customers.update(active=status)
 
         serializer = CustomerSerializer(customers, many=True)
