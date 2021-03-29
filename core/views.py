@@ -1,6 +1,9 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from rest_framework.filters import SearchFilter
 
 from core.models import Customer, Profession, DataSheet, Document
 from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
@@ -11,7 +14,10 @@ class CustomerViewSet(viewsets.ModelViewSet):
     # queryset = Customer.objects.filter(active=True)  # ถ้าเราต้องการ filter ก้อมาทำแบบนี้ได้เลย เพราะอันนี้คือการ query
     serializer_class = CustomerSerializer
 
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+
     filterset_fields = ('name', )
+    search_fields = ('name', 'address')
 
     def get_queryset(self):  # แบบนี้ปกติจะ get ได้หมด หรือจะส่ง address='xx' เข้ามา filter ก็ได้ localhost:8000/api/customers/?address='form'
         address = self.request.query_params.get('address', None)
