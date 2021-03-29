@@ -11,11 +11,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
     # queryset = Customer.objects.filter(active=True)  # ถ้าเราต้องการ filter ก้อมาทำแบบนี้ได้เลย เพราะอันนี้คือการ query
     serializer_class = CustomerSerializer
 
+    filterset_fields = ('name', )
+
     def get_queryset(self):  # แบบนี้ปกติจะ get ได้หมด หรือจะส่ง address='xx' เข้ามา filter ก็ได้ localhost:8000/api/customers/?address='form'
         address = self.request.query_params.get('address', None)
 
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
 
         if self.request.query_params.get('active') == 'False':
             status = False
