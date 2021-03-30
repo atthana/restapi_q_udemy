@@ -4,9 +4,18 @@ from .models import Customer, Profession, Document, DataSheet
 
 
 class CustomerSerializer(serializers.ModelSerializer):
+    num_professions = serializers.SerializerMethodField()
+
     class Meta:
         model = Customer
-        fields = ('id', 'name', 'address', 'profession', 'datasheet', 'active', 'status_message')
+        fields = ('id', 'name', 'address', 'profession',
+                  'datasheet', 'active', 'status_message',
+                  'num_professions',
+                  )
+
+    def get_num_professions(self, obj):
+        # import pdb; pdb.set_trace()
+        return obj.num_professions()
 
 
 class ProfessionSerializer(serializers.ModelSerializer):
