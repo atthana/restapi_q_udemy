@@ -19,8 +19,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
     filterset_fields = ('name', )
     search_fields = ('name', 'address')
     # ordering_fields = '__all__'
-    ordering = ('-id', )
-    lookup_field = 'name'
+    ordering = ('id', )
+    # lookup_field = 'name'
 
     def get_queryset(self):  # แบบนี้ปกติจะ get ได้หมด หรือจะส่ง address='xx' เข้ามา filter ก็ได้ localhost:8000/api/customers/?address='form'
         address = self.request.query_params.get('address', None)
