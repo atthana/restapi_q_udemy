@@ -1,9 +1,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
-
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import AllowAny
 
 from core.models import Customer, Profession, DataSheet, Document
 from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
@@ -16,13 +15,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
 
-    filterset_fields = ('name', )
+    filterset_fields = ('name',)
     search_fields = ('name', 'address')
     # ordering_fields = '__all__'
-    ordering = ('id', )
+    ordering = ('id',)
     # lookup_field = 'name'
+    authentication_classes = [
+        TokenAuthentication, ]  # บรรทัดนี้ใช้เพื่อทำให้ api viewset อันนี้ต้องใช้ token เข้ามานะ ไม่สามารถ get ได้แบบปกติแล้ว
 
-    def get_queryset(self):  # แบบนี้ปกติจะ get ได้หมด หรือจะส่ง address='xx' เข้ามา filter ก็ได้ localhost:8000/api/customers/?address='form'
+    def get_queryset(
+            self):  # แบบนี้ปกติจะ get ได้หมด หรือจะส่ง address='xx' เข้ามา filter ก็ได้ localhost:8000/api/customers/?address='form'
         address = self.request.query_params.get('address', None)
 
         # import pdb
@@ -37,7 +39,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
         else:
             customers = Customer.objects.filter(active=status)
         return customers
-
 
     # def get_queryset(self):  # ผมเทสผ่านล่ะนะ แต่ถ้าจะเทส ก้อไป comment method อื่นออก
     #     # import pdb;
@@ -178,13 +179,22 @@ class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.filter(
         id=4)  # ถ้าแบบนี้ก้อจะช่วย filter จาก id ที่ 2 ได้เลยเวลาเรียก api 'professions'
     serializer_class = ProfessionSerializer
+    authentication_classes = [
+        TokenAuthentication, ]  # บรรทัดนี้ใช้เพื่อทำให้ api viewset อันนี้ต้องใช้ token เข้ามานะ ไม่สามารถ get ได้แบบปกติแล้ว
 
 
 class DataSheetViewSet(viewsets.ModelViewSet):
     queryset = DataSheet.objects.all()
     serializer_class = DataSheetSerializer
+    permission_classes = [AllowAny, ]  # ถ้าทำแบบนี้จะทำให้ไม่ต้อง authen ก้อสามารถ get ค่าออกมาได้เลยนะ
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+
+
+
+# สรุปนะ ถ้ายังไม่ได้ implement token เข้ามา จะต้องใช้ username+password ทุกครั้ง ไม่งั้นจะฟ้องว่า "detail": "Authentication credentials were not provided."
+# แต่ถ้า implement token เข้ามาแล้ว ก้อใช้ username + password ไม่ได้แล้วเช่นกัน ต้องใช้ token แนบเข้ามาใน Header เท่านั้นเพื่อ get ค่าออกมา
+# แต่ถ้าต้องการให้ api นั้นไม่มี authen เลยอันเดียวเท่านั้น ก้อให้ไป set allowany แบบนี้ permission_classes = [AllowAny, ]
