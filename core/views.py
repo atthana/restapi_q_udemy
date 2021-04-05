@@ -2,7 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly, DjangoModelPermissions, \
+    DjangoModelPermissionsOrAnonReadOnly
 
 from core.models import Customer, Profession, DataSheet, Document
 from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
@@ -195,8 +196,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     authentication_classes = [TokenAuthentication, ]
-    permission_classes = [IsAuthenticatedOrReadOnly, ]  #  สามารถ GET ได้แม้ว่าจะไม่่ได้แนบ token เข้ามา, แต่ถ้าจะ POST ต้องแนบ token ใน Headers และใส่ Body เข้ามาด้วย, DELETE ก้อทำได้เช่นกันนะ แค่ใส่ id กับ token เข้าไป
-
+    # permission_classes = [IsAuthenticatedOrReadOnly, ]  #  สามารถ GET ได้แม้ว่าจะไม่่ได้แนบ token เข้ามา, แต่ถ้าจะ POST ต้องแนบ token ใน Headers และใส่ Body เข้ามาด้วย, DELETE ก้อทำได้เช่นกันนะ แค่ใส่ id กับ token เข้าไป
+    # permission_classes = [DjangoModelPermissions, ]
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly, ]  # ไม่ต้อง Authen ก้อ get ได้นะ
 
 
 # สรุปนะ ถ้ายังไม่ได้ implement token เข้ามา จะต้องใช้ username+password ทุกครั้ง ไม่งั้นจะฟ้องว่า "detail": "Authentication credentials were not provided."
