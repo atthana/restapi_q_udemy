@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
 
 from core.models import Customer, Profession, DataSheet, Document
 from core.serializers import CustomerSerializer, ProfessionSerializer, DataSheetSerializer, DocumentSerializer
@@ -175,12 +175,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
     #     return Response(serializer.data)
 
 
-class ProfessionViewSet(viewsets.ModelViewSet):
-    queryset = Profession.objects.filter(
-        id=4)  # ถ้าแบบนี้ก้อจะช่วย filter จาก id ที่ 2 ได้เลยเวลาเรียก api 'professions'
+class ProfessionViewSet(viewsets.ModelViewSet):  # แบบนี้เราก้อทำได้หมดแล้วนะ ทั้ง GET, POST, PUT, PATCH
+    # queryset = Profession.objects.filter(
+    #     id=4)  # ถ้าแบบนี้ก้อจะช่วย filter จาก id ที่ 2 ได้เลยเวลาเรียก api 'professions'
+    queryset = Profession.objects.all()
     serializer_class = ProfessionSerializer
     authentication_classes = [
         TokenAuthentication, ]  # บรรทัดนี้ใช้เพื่อทำให้ api viewset อันนี้ต้องใช้ token เข้ามานะ ไม่สามารถ get ได้แบบปกติแล้ว
+    permission_classes = [IsAdminUser, ]  # อันนี้จะทำให้้ต้องเป็น admin ที่เป็น staff เท่านั้นจึงจะ GET ได้, ถ้ามีแค่ token อย่างเดียวยังไม่ได้นะ
 
 
 class DataSheetViewSet(viewsets.ModelViewSet):
@@ -192,6 +194,8 @@ class DataSheetViewSet(viewsets.ModelViewSet):
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]  #  สามารถ GET ได้แม้ว่าจะไม่่ได้แนบ token เข้ามา, แต่ถ้าจะ POST ต้องแนบ token ใน Headers และใส่ Body เข้ามาด้วย, DELETE ก้อทำได้เช่นกันนะ แค่ใส่ id กับ token เข้าไป
 
 
 
