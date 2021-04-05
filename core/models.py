@@ -24,11 +24,14 @@ class Customer(models.Model):
     name = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
     profession = models.ManyToManyField(Profession)
-    datasheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE)
+    datasheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE,
+                                     null=True, blank=True)
     active = models.BooleanField(default=True)
+    doc_num = models.CharField(max_length=12, unique=True, null=True, blank=True)
 
     @property
-    def status_message(self):  # เราสามารถสร้าง property field ขึ้นมาเปรียบเสมือน มีอีก field นึงให้ serializer พ่นออกไปได้เลย
+    def status_message(
+            self):  # เราสามารถสร้าง property field ขึ้นมาเปรียบเสมือน มีอีก field นึงให้ serializer พ่นออกไปได้เลย
         #  อย่างในเคสนี้ก้อให้มัน follow กับ active ข้างบน และโชว์ออกไปเป็น wording ที่เราต้องการ แต่ต้องเพิ่ม field ใน serializer ด้วยนะ
         if self.active:
             return 'Customer active'
