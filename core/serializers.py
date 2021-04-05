@@ -8,6 +8,8 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = ('id', 'dtype', 'doc_number', 'customer',)
 
+        read_only_fields = ['customer']
+
 
 class DataSheetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,13 +38,24 @@ class CustomerSerializer(serializers.ModelSerializer):
                   )
 
     def create(self, validated_data):
+        import pdb
+        pdb.set_trace()
 
         # จริงๆจะทำแบบไหนก้อได้นะคือ ดึงออกมาแล้วค่อย del หรือ จะ pop ออกมาเลยก็ได้
         professions = validated_data['profession']  # เอามาเก็บในตัวแปรก่อน
-
         del validated_data['profession']  # เสดแล้วก้อลบทิ้งไป
 
+        document_set = validated_data['document_set']  # เอามาเก็บในตัวแปรก่อน
+        del validated_data['document_set']
+
         customer = Customer.objects.create(**validated_data)  # จากนั้นค่อย create ส่วน customer ข้างในที่ไม่มี nested
+
+        for doc in document_set:
+            Document.objects.create(
+                dtype=doc['dtype'],
+                doc_number=doc['doc_number'],
+                customer_id=customer.id
+            )
 
         for profession in professions:  # แล้วก็มาทำส่วน profession ที่เป็น nested โดยใช้ for loop
             prof = Profession.objects.create(**profession)  # create ในส่วนของ Profession
